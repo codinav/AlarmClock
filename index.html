@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Clock</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+    <div class="time-container">
+      <div>
+        <span id="current-time">00:00:00
+      </div>
+      <div class="Set-Alarm">Set Alarm</div>
+      </span>
+      <hr class="hrWidth">
+      <span id="alarmTime">
+        <input type="number" id="hours" min="1" max="12" step="1" value="12">
+        <span>:</span>
+        <input type="number" id="minutes" min="0" max="59" step="1" value="0">
+        <span>:</span>
+        <input type="number" id="seconds" min="0" max="59" step="1" value="0">
+        <select id="meridiem">
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+        <button onclick="setAlarm()">Set Alarm</button>
+      </span>
+      <span id="alarms">Alarms</span>
+    </div>
+  
+  
+  
+    <script>
+      function updateTime() {
+        const currentTimeElement = document.getElementById('current-time');
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const twelveHourFormat = hours % 12 || 12;
+        const currentTimeString = `${twelveHourFormat}:${minutes}:${seconds} ${ampm}`;
+        currentTimeElement.innerText = currentTimeString;
+      }
+  
+      const alarmsContainer = document.getElementById('alarms');
+      const alarms = [];
+  
+      function createAlarmElement(alarmTimeFormatted, alarmTimeout) {
+        const alarmElement = document.createElement('div');
+        alarmElement.textContent = alarmTimeFormatted;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete Alarm';
+        deleteButton.onclick = function () {
+          clearTimeout(alarmTimeout);
+          alarmsContainer.removeChild(alarmElement);
+          const index = alarms.indexOf(alarmElement);
+          if (index !== -1) {
+            alarms.splice(index, 1);
+          }
+        };
+        alarmElement.appendChild(deleteButton);
+        alarmsContainer.appendChild(alarmElement);
+        alarms.push(alarmElement);
+      }
+  
+      function setAlarm() {
+        const hours = parseInt(document.getElementById('hours').value, 10);
+        const minutes = parseInt(document.getElementById('minutes').value, 10);
+        const seconds = parseInt(document.getElementById('seconds').value, 10);
+        const meridiem = document.getElementById('meridiem').value;
+  
+        const alarmTime = new Date();
+        alarmTime.setHours(meridiem === 'PM' && hours !== 12 ? hours + 12 : hours);
+        alarmTime.setMinutes(minutes);
+        alarmTime.setSeconds(seconds);
+  
+        const currentTime = new Date();
+        const timeRemaining = alarmTime - currentTime;
+  
+        if (timeRemaining < 0) {
+          alert("Alarm Is Ringing");
+          return;
+        }
+  
+        const alarmTimeFormatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${meridiem}`;
+        const alarmTimeout = setTimeout(() => {
+          alert("Alarm! Time is up!");
+          const index = alarms.indexOf(alarmElement);
+          if (index !== -1) {
+            alarms.splice(index, 1);
+          }
+          alarmsContainer.removeChild(alarmElement);
+        }, timeRemaining);
+  
+        createAlarmElement(alarmTimeFormatted, alarmTimeout);
+      }
+  
+      updateTime();
+      setInterval(updateTime, 1000); // Update current time every 1 second
+    </script>
+  </body>
+  
+  </html>
